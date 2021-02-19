@@ -1,0 +1,11 @@
+html, body {
+    padding: 50px;
+    background-color: #000000;
+    color : white;
+    font-family: sans-serif;
+    display: table;
+}
+#container {
+    display: flex;
+    justify-content: center;
+}

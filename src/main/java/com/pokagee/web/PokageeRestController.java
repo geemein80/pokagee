@@ -24,7 +24,7 @@ public class PokageeRestController {
     return new ResponseEntity(pot, HttpStatus.OK);
   }
 
-  @GetMapping(path = "/resetPot", consumes = "application/json", produces = "application/json")
+  @GetMapping(path = "/resetPot", produces = "application/json")
   public ResponseEntity resetPot() {
     pot.setPot(0);
     return new ResponseEntity(pot, HttpStatus.OK);
