@@ -2,11 +2,12 @@ import React, { Component } from "react";
 
 var xhr;
 var initialState = {
-    addToPot: '',
     pot:'0',
-    selectedStreet:"TURN",
-    betSize:'',
-    outs:'',
+    flop:'',
+    turn:'',
+    river:'',
+    smallBlind:'',
+    bigBlind:'',
     pokerStats:{}
 
 };
@@ -15,90 +16,55 @@ class PokerStatsForm extends React.Component {
         super(props);
         this.state = initialState;
 
-        this.handleResetPot = this.handleResetPot.bind(this);
-        this.handleResetPotResponse = this.handleResetPotResponse.bind(this);
+        this.handleSmallBlindChange = this.handleSmallBlindChange.bind(this);
+        this.handleBigBlindChange = this.handleBigBlindChange.bind(this);
+        this.handlePotChange = this.handlePotChange.bind(this);
 
-        this.handleAddToPotValue = this.handleAddToPotValue.bind(this);
-        this.handleAddToPot = this.handleAddToPot.bind(this);
-        this.handleAddToPotResponse = this.handleAddToPotResponse.bind(this);
-
-        this.handleStreetChange = this.handleStreetChange.bind(this);
-        this.handleBetSizeChange = this.handleBetSizeChange.bind(this);
-        this.handleOutsChange = this.handleOutsChange.bind(this);
+        this.handleFlopChange = this.handleFlopChange.bind(this);
+        this.handleTurnChange = this.handleTurnChange.bind(this);
+        this.handleRiverChange = this.handleRiverChange.bind(this);
 
         this.handleSubmitBetStatsRequest = this.handleSubmitBetStatsRequest.bind(this);
         this.handleSubmitBetStatsResponse = this.handleSubmitBetStatsResponse.bind(this);
 
     }
 
-
-    handleResetPot(event) {
-        xhr = new XMLHttpRequest();
-        xhr.open("GET", "http://localhost:8282/resetPot", true);
-        xhr.setRequestHeader("Accept", "application/json");
-        xhr.send();
-        xhr.addEventListener("readystatechange", this.handleResetPotResponse, false);
-
+    handleSmallBlindChange(event) {
+        this.setState({smallBlind: event.target.value});
     }
-    handleResetPotResponse() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            var response = JSON.parse(xhr.responseText);
-            this.setState(initialState);
-        }
+    handleBigBlindChange(event) {
+        this.setState({bigBlind: event.target.value});
     }
-    handleAddToPotValue(event) {
-        this.setState({addToPot: event.target.value});
-    }
-    handleStreetChange(event) {
-        this.setState({selectedStreet: event.target.value});
-    }
-    handleBetSizeChange(event) {
-        this.setState({betSize: event.target.value});
-    }
-    handleOutsChange(event) {
-        this.setState({outs: event.target.value});
+    handlePotChange(event) {
+        this.setState({pot: event.target.value});
     }
 
-    handleAddToPot(event) {
-
-        xhr = new XMLHttpRequest();
-        xhr.open("POST", "http://localhost:8282/addToPot", true);
-        xhr.setRequestHeader("Content-type", "application/json");
-        xhr.setRequestHeader("Accept", "application/json");
-        var request = {
-            addToPot:this.state.addToPot
-        };
-        xhr.send(JSON.stringify(request));
-
-        xhr.addEventListener("readystatechange", this.handleAddToPotResponse, false);
-
+    handleFlopChange(event) {
+        this.setState({flop: event.target.value});
     }
-    handleAddToPotResponse() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            var response = JSON.parse(xhr.responseText);
-            this.setState({pot: response.pot});
-
-        }
+    handleTurnChange(event) {
+        this.setState({turn: event.target.value});
+    }
+    handleRiverChange(event) {
+        this.setState({river: event.target.value});
     }
 
     handleSubmitBetStatsRequest(event) {
         xhr = new XMLHttpRequest();
-        if(this.state.selectedStreet === 'TURN') {
-            xhr.open("POST", "http://localhost:8282/turnStats", true);
+        xhr.open("POST", "http://localhost:8282/stats", true);
 
-        } else {
-            xhr.open("POST", "http://localhost:8282/riverStats", true);
 
-        }
         xhr.setRequestHeader("Content-type", "application/json");
         xhr.setRequestHeader("Accept", "application/json");
         var request = {
-            bet:this.state.betSize,
-            outs:this.state.outs
+            bet:this.state.flop,
+            turn:this.state.turn
         };
         xhr.send(JSON.stringify(request));
 
         xhr.addEventListener("readystatechange", this.handleSubmitBetStatsResponse, false);
+        event.preventDefault();
+
     }
 
     handleSubmitBetStatsResponse(event) {
@@ -123,38 +89,42 @@ class PokerStatsForm extends React.Component {
     render() {
         var stats = this.createStats();
         return (<div>
-                    <form onSubmit={this.handleResetPot}>
-                        <input type="submit" text="test" value="Reset Pot" />
-                    </form>
-                    <form onSubmit={this.handleAddToPot}>
-                        <br/>
-                        <br/>
-                        <label>
-                            <input type="text" value={this.state.addToPot} onChange={this.handleAddToPotValue} />
-                        </label>
-                        <input type="submit" value="Add To Pot" />
-                    </form>
                 <form onSubmit={this.handleSubmitBetStatsRequest}>
-                    <br/>
-                    <div>
-                        Turn:
-                        <input type="radio" value="TURN" checked={this.state.selectedStreet ==='TURN'} onChange={this.handleStreetChange} />
-
-                    </div>
-                    <div>
-                        River:
-                        <input type="radio" value="RIVER" checked={this.state.selectedStreet ==='RIVER'} onChange={this.handleStreetChange} />
-                    </div>
-
-                    <br/>
                     <label>
-                        Bet Size:
-                        <input type="text" value={this.state.betSize} onChange={this.handleBetSizeChange} />
+                        Small Blind:
+                        <input type="text" value={this.state.smallBlind} onChange={this.handleSmallBlindChange} />
                     </label>
                     <br/>
                     <label>
-                        Outs:
-                        <input type="text" value={this.state.outs} onChange={this.handleOutsChange} />
+                        Big Blind:
+                        <input type="text" value={this.state.bigBlind} onChange={this.handleBigBlindChange} />
+                    </label>
+                    <br/>
+                    <br/>
+                    <br/>
+
+                    <label>
+                        Pot:
+                        <input type="text" value={this.state.pot} onChange={this.handlePotChange} />
+                    </label>
+                    <br/>
+
+                    <br/>
+                    <br/>
+
+                    <label>
+                        Flop:
+                        <input type="text" value={this.state.flop} onChange={this.handleFlopChange} />
+                    </label>
+                    <br/>
+                    <label>
+                        Turn:
+                        <input type="text" value={this.state.turn} onChange={this.handleTurnChange} />
+                    </label>
+                    <br/>
+                    <label>
+                        River:
+                        <input type="text" value={this.state.river} onChange={this.handleRiverChange} />
                     </label>
                     <br/>
                     <br/>
