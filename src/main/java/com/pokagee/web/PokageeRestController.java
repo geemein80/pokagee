@@ -1,10 +1,13 @@
 package com.pokagee.web;
 
 import com.pokagee.core.PokerGame;
+import com.pokagee.core.PokerSimulator;
 import com.pokagee.dto.AddToPotRequest;
 import com.pokagee.dto.PokerStats;
 import com.pokagee.dto.PokerStatsRequest;
 import com.pokagee.dto.Pot;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class PokageeRestController {
+
+  private static final Logger log = LoggerFactory.getLogger(PokageeRestController.class);
+
 
   private PokerGame pokerGame = new PokerGame();
   private Pot pot = new Pot();
@@ -30,33 +36,12 @@ public class PokageeRestController {
     return new ResponseEntity(pot, HttpStatus.OK);
   }
 
-  @PostMapping(path = "/turnStats", consumes = "application/json", produces = "application/json")
+  @PostMapping(path = "/stats", consumes = "application/json", produces = "application/json")
   public ResponseEntity turnStats(@RequestBody PokerStatsRequest pokerStatsRequest) {
-    PokerStats pokerStats = new PokerStats();
-    Double potOdds = 4.0 * pokerStatsRequest.getOuts()/100;
-    Double foldingFrequency = pokerStatsRequest.getBet().doubleValue() / (pokerStatsRequest.getBet().doubleValue() + pot.getPot().doubleValue());
-    pokerStats.setPotOdds(potOdds);
-    pokerStats.setFoldingFrequency(foldingFrequency);
-    if(potOdds > foldingFrequency) {
-      pokerStats.setAction("BET");
-    } else {
-      pokerStats.setAction("FOLD/CHECK");
-    }
+    Long start = System.currentTimeMillis();
+    PokerStats pokerStats = PokerSimulator.calculatePokerStats(pokerStatsRequest);
+    log.info("Duration Seconds : "+((System.currentTimeMillis()-start)/1000l));
     return new ResponseEntity(pokerStats, HttpStatus.OK);
   }
 
-  @PostMapping(path = "/riverStats", consumes = "application/json", produces = "application/json")
-  public ResponseEntity riverStats(@RequestBody PokerStatsRequest pokerStatsRequest) {
-    PokerStats pokerStats = new PokerStats();
-    Double potOdds = 2.0 * pokerStatsRequest.getOuts()/100;
-    Double foldingFrequency = pokerStatsRequest.getBet().doubleValue() / (pokerStatsRequest.getBet().doubleValue() + pot.getPot().doubleValue());
-    pokerStats.setPotOdds(potOdds);
-    pokerStats.setFoldingFrequency(foldingFrequency);
-    if(potOdds > foldingFrequency) {
-      pokerStats.setAction("BET");
-    } else {
-      pokerStats.setAction("FOLD/CHECK");
-    }
-    return new ResponseEntity(pokerStats, HttpStatus.OK);
-  }
 }

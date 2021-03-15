@@ -1,33 +1,94 @@
 package com.pokagee.dto;
 
 public class PokerStats {
-  private Double potOdds;
 
-  private Double foldingFrequency;
+  private Double pot;
 
-  private String action;
+  private Double probWin;
 
-  public Double getPotOdds() {
-    return potOdds;
+  private Double probLoss;
+
+  private Double evBigBlind;
+
+  private Double evDoubleBigBlind;
+
+  private Double evHalfPot;
+
+  private Double evThreeQuarterPot;
+
+  private Double evPot;
+
+  private Double evAllIn;
+
+  public Double getPot() {
+    return pot;
   }
 
-  public void setPotOdds(Double potOdds) {
-    this.potOdds = potOdds;
+  public void setPot(Double pot) {
+    this.pot = pot;
   }
 
-  public Double getFoldingFrequency() {
-    return foldingFrequency;
+  public Double getEvBigBlind() {
+    return evBigBlind;
   }
 
-  public void setFoldingFrequency(Double foldingFrequency) {
-    this.foldingFrequency = foldingFrequency;
+  public void setEvBigBlind(Double evBigBlind) {
+    this.evBigBlind = evBigBlind;
   }
 
-  public String getAction() {
-    return action;
+  public Double getEvDoubleBigBlind() {
+    return evDoubleBigBlind;
   }
 
-  public void setAction(String action) {
-    this.action = action;
+  public void setEvDoubleBigBlind(Double evDoubleBigBlind) {
+    this.evDoubleBigBlind = evDoubleBigBlind;
+  }
+
+  public Double getEvHalfPot() {
+    return evHalfPot;
+  }
+
+  public void setEvHalfPot(Double evHalfPot) {
+    this.evHalfPot = evHalfPot;
+  }
+
+  public Double getEvThreeQuarterPot() {
+    return evThreeQuarterPot;
+  }
+
+  public void setEvThreeQuarterPot(Double evThreeQuarterPot) {
+    this.evThreeQuarterPot = evThreeQuarterPot;
+  }
+
+  public Double getEvPot() {
+    return evPot;
+  }
+
+  public void setEvPot(Double evPot) {
+    this.evPot = evPot;
+  }
+
+  public Double getEvAllIn() {
+    return evAllIn;
+  }
+
+  public void setEvAllIn(Double evAllIn) {
+    this.evAllIn = evAllIn;
+  }
+
+  public Double getProbWin() {
+    return probWin;
+  }
+
+  public void setProbWin(Double probWin) {
+    this.probWin = probWin;
+  }
+
+  public Double getProbLoss() {
+    return probLoss;
+  }
+
+  public void setProbLoss(Double probLoss) {
+    this.probLoss = probLoss;
   }
 }

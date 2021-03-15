@@ -1,93 +1,165 @@
 package com.pokagee.core;
 
+import com.pokagee.dto.PokerStats;
+import com.pokagee.dto.PokerStatsRequest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PokerSimulator {
-  public static void main(String[] args) {
-    double player1Wins = 0.0d;
-    double player2Wins = 0.0d;
-    double numberOfGames = 1000;
-    for( int sessions = 0; sessions<=numberOfGames; sessions++) {
-      Set<Card> existingCards = new HashSet<Card>();
-      Card player1Card1 = new Card(1, 14);
-      Card player1Card2 = new Card(2, 14);
 
-      Card player2Card1 = new Card(3, 13);
-      Card player2Card2 = new Card(4, 13);
-
-      existingCards.add(player1Card1);
-      existingCards.add(player1Card2);
-      existingCards.add(player2Card1);
-      existingCards.add(player2Card2);
-
-      Card[] player1 = new Card[7];
-      player1[0] = player1Card1;
-      player1[1] = player1Card2;
-      Card[] player2 = new Card[7];
-      player2[0] = player2Card1;
-      player2[1] = player2Card2;
-
-      List<Card> cards = createShuffledDeck();
-
-      Card[] communityCards = getCommunityCards(cards, existingCards);
-      for(int i=0;i<communityCards.length;i++) {
-        player1[i+2] = communityCards[i];
-        player2[i+2] = communityCards[i];
-      }
-
-//      System.out.println("========COMMUNITY CARDS=======");
-//      for(int i=0;i<communityCards.length;i++) {
-//        System.out.print(communityCards[i] +" - ");
-//      }
-//
-//      System.out.println("\n========PLAYER 1=======");
-//      for(int i=0;i<2;i++) {
-//        System.out.print(player1[i] +" - ");
-//      }
-//      System.out.println("\n========PLAYER 2=======");
-//      for(int i=0;i<2;i++) {
-//        System.out.print(player2[i] +" - ");
-//      }
-//
-      int cardScore1 = getCardScore(player1);
-      int cardScore2 = getCardScore(player2);
-//      System.out.println();
-      if(cardScore1>cardScore2) {
-//        System.out.println("Player1 Wins!");
-        player1Wins++;
-      } else if(cardScore1<cardScore2 ){
-//        System.out.println("Player2 Wins!");
-        player2Wins++;
-
-      } else {
-//        System.out.println("Tie!");
-      }
+  public static Card[] getCardsFromString(String cardsStr) {
+    if(cardsStr==null || cardsStr.trim().equals("")) {
+      return new Card[]{};
     }
-    System.out.println("player1 ratio = "+ (player1Wins/numberOfGames ));
-    System.out.println("player2 ratio = "+ (player2Wins/numberOfGames ));
+    Pattern pattern = Pattern.compile("[cshd]");
+    Matcher matcher = pattern.matcher(cardsStr);
+    Integer prevEndIndex = 0;
+    List<Card> cardList = new ArrayList<>();
+    while (matcher.find()) {
 
+      Card card = new Card(matcher.group(), cardsStr.substring(prevEndIndex, matcher.end()-1) );
+      cardList.add(card);
 
-    System.out.println("DONE");
+      prevEndIndex = matcher.end();
+    }
+    return cardList.toArray(new Card[]{});
   }
 
-  public static Card[] getCommunityCards(List<Card> cards, Set<Card> existingCards) {
+  public static PokerStats calculatePokerStats(PokerStatsRequest pokerStatsRequest) {
+    double heroWinCount = 0.0d;
+    //double numberOfGames = 10000000.0d;  //10 minute calculation
+    double numberOfGames = 100000.0d;
+
+
+
+    Card[] heroCards = getCardsFromString(pokerStatsRequest.getHand());
+    Card[] flop = getCardsFromString(pokerStatsRequest.getFlop());
+    Card[] turnArr = getCardsFromString(pokerStatsRequest.getTurn());
+    Card[] riverArr = getCardsFromString(pokerStatsRequest.getRiver());
+
+    Card turn = null;
+    Card river = null;
+
+    if(turnArr.length>0) {
+      turn = turnArr[0];
+    }
+    if(riverArr.length>0) {
+      river = riverArr[0];
+    }
+
+    for( int sessions = 0; sessions<=numberOfGames; sessions++) {
+      Set<Card> existingCards = new HashSet<Card>();
+
+      existingCards.addAll(Arrays.asList(heroCards));
+      existingCards.addAll(Arrays.asList(flop));
+      existingCards.addAll(Arrays.asList(turn));
+      existingCards.addAll(Arrays.asList(river));
+
+      Card[] hero = new Card[7];
+      hero[0] = heroCards[0];
+      hero[1] = heroCards[1];
+
+      List<Card> cards = createShuffledDeck(existingCards);
+      Integer villainCount = pokerStatsRequest.getVillainCount();
+
+      int cardIndex = 0;
+
+      List<Card[]> villains = new ArrayList<>();
+      for(int i=0;i<villainCount;i++) {
+        Card[] villain = new Card[7];
+        villain[0] = cards.get(i+0);
+        villain[1] = cards.get(i+1);
+        villains.add(villain);
+        cardIndex+=2;
+      }
+
+      Card[] communityCards = getRemainingCommunityCards(cards, cardIndex);
+      int communityCardIndex = 0;
+      if(flop.length!=3) {
+        flop = new  Card[3];
+        flop[0] = communityCards[communityCardIndex++];
+        flop[1] = communityCards[communityCardIndex++];
+        flop[2] = communityCards[communityCardIndex++];
+      }
+      if(turn==null) {
+        turn = communityCards[communityCardIndex++];
+      }
+      if(river==null) {
+        river = communityCards[communityCardIndex++];
+      }
+
+      assignCommunityCards(hero, flop, turn, river);
+
+      int heroScore = getCardScore(hero);
+      boolean heroWins = true;
+      for(int i=0;i<villainCount;i++) {
+        Card[] villain = villains.get(i);
+        assignCommunityCards(villain, flop, turn, river);
+        int villainScore = getCardScore(villain);
+        if(villainScore>heroScore) {
+          heroWins = false;
+          break;
+        }
+      }
+      if(heroWins) {
+        heroWinCount++;
+      }
+
+    }
+    System.out.println("heroWinCount ratio = "+ (heroWinCount/numberOfGames ));
+    System.out.println("heroLossCount ratio = "+ ((numberOfGames-heroWinCount)/numberOfGames));
+
+    System.out.println("DONE");
+    Double probWin = (heroWinCount/numberOfGames);
+    Double probLoss = ((numberOfGames-heroWinCount)/numberOfGames);
+    Double pot = pokerStatsRequest.getPot();
+    Double probWinPot = probWin*pot;
+
+    PokerStats pokerStats = new PokerStats();
+    pokerStats.setProbWin(probWin);
+    pokerStats.setProbLoss(probLoss);
+    pokerStats.setPot(pot);
+    pokerStats.setEvAllIn(probWinPot - probLoss * pokerStatsRequest.getHeroStack());
+    pokerStats.setEvBigBlind(probWinPot - probLoss * pokerStatsRequest.getBigBlind());
+    pokerStats.setEvDoubleBigBlind(probWinPot - 2 * probLoss * pokerStatsRequest.getBigBlind());
+    pokerStats.setEvHalfPot(probWinPot - .5*pot*probLoss);
+    pokerStats.setEvThreeQuarterPot(probWinPot - .75*pot*probLoss);
+    pokerStats.setEvPot(probWinPot - pot * probLoss);
+
+    return pokerStats;
+  }
+
+  public static void assignCommunityCards(Card[] playerCards, Card[] flop, Card turn, Card river) {
+    if(flop.length==3) {
+      playerCards[2] = flop[0];
+      playerCards[3] = flop[1];
+      playerCards[4] = flop[2];
+      if(turn !=null) {
+        playerCards[5] = turn;
+        if(river!=null) {
+          playerCards[6] = river;
+        }
+      }
+    }
+  }
+
+  public static Card[] getRemainingCommunityCards(List<Card> cards, Integer cardIndex/*, Set<Card> existingCards*/) {
     Card[] comCards = new Card[5];
     int comCardIdx = 0;
-    int currentCardIdx = 0;
+    int currentCardIdx = cardIndex;
     boolean isFlop = true;
     while(comCards[4]==null) {
       if (isFlop) {
         while(comCardIdx<3) {
           Card currentCard = cards.get(currentCardIdx);
-
-          if (!existingCards.contains(currentCard)) {
-            comCards[comCardIdx] = currentCard;
-            comCardIdx++;
-          }
+          comCards[comCardIdx] = currentCard;
+          comCardIdx++;
           currentCardIdx++;
 
         }
@@ -95,11 +167,9 @@ public class PokerSimulator {
       } else {
         currentCardIdx++;
         Card currentCard = cards.get(currentCardIdx);
+        comCards[comCardIdx] = currentCard;
+        comCardIdx++;
 
-        if (!existingCards.contains(currentCard)) {
-          comCards[comCardIdx] = currentCard;
-          comCardIdx++;
-        }
         currentCardIdx++;
       }
 
@@ -132,13 +202,15 @@ public class PokerSimulator {
     return highestValue;
   }
 
-  public static List<Card> createShuffledDeck() {
+  public static List<Card> createShuffledDeck(Set<Card> existingCards) {
     List<Card> deck = new ArrayList<Card>();
 
     for(int i=1;i<=4;i++) {
       for(int j=1;j<=13;j++) {
         Card card = new Card(i, j);
-        deck.add(card);
+        if(!existingCards.contains(card)) {
+          deck.add(card);
+        }
       }
     }
     Collections.shuffle(deck);

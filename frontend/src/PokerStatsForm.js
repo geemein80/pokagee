@@ -6,6 +6,9 @@ var initialState = {
     flop:'',
     turn:'',
     river:'',
+    heroStack:'',
+    hand:'',
+    villainCount:'',
     smallBlind:'',
     bigBlind:'',
     pokerStats:{}
@@ -19,6 +22,9 @@ class PokerStatsForm extends React.Component {
         this.handleSmallBlindChange = this.handleSmallBlindChange.bind(this);
         this.handleBigBlindChange = this.handleBigBlindChange.bind(this);
         this.handlePotChange = this.handlePotChange.bind(this);
+        this.handleHeroStackChange = this.handleHeroStackChange.bind(this);
+        this.handleHandChange = this.handleHandChange.bind(this);
+        this.handleVillainCountChange = this.handleVillainCountChange.bind(this);
 
         this.handleFlopChange = this.handleFlopChange.bind(this);
         this.handleTurnChange = this.handleTurnChange.bind(this);
@@ -28,7 +34,15 @@ class PokerStatsForm extends React.Component {
         this.handleSubmitBetStatsResponse = this.handleSubmitBetStatsResponse.bind(this);
 
     }
-
+    handleHandChange(event) {
+        this.setState({hand: event.target.value});
+    }
+    handleVillainCountChange(event) {
+        this.setState({villainCount: event.target.value});
+    }
+    handleHeroStackChange(event) {
+        this.setState({heroStack: event.target.value});
+    }
     handleSmallBlindChange(event) {
         this.setState({smallBlind: event.target.value});
     }
@@ -57,8 +71,16 @@ class PokerStatsForm extends React.Component {
         xhr.setRequestHeader("Content-type", "application/json");
         xhr.setRequestHeader("Accept", "application/json");
         var request = {
-            bet:this.state.flop,
-            turn:this.state.turn
+            heroStack:this.state.heroStack,
+            villainCount:this.state.villainCount,
+            smallBlind:this.state.smallBlind,
+            hand:this.state.hand,
+            bigBlind:this.state.bigBlind,
+            pot:this.state.pot,
+            flop:this.state.flop,
+            turn:this.state.turn,
+            river:this.state.river
+
         };
         xhr.send(JSON.stringify(request));
 
@@ -76,15 +98,26 @@ class PokerStatsForm extends React.Component {
     createStats() {
         var pokerStats = this.state.pokerStats;
         return <div>
-            <div>Pot : {this.state.pot} </div>
+            <div>Pot : {pokerStats.pot} </div>
             <br/>
-            <div>Pot Odds : {pokerStats.potOdds} </div>
+            <div>Prob Win : {pokerStats.probWin} </div>
             <br/>
-            <div>Folding Frequency : {pokerStats.foldingFrequency} </div>
+            <div>Prob Loss : {pokerStats.probLoss} </div>
             <br/>
-            <div>Action : {pokerStats.action} </div>
+            <div>EV BB : {pokerStats.evBigBlind} </div>
+            <br/>
+            <div>EV 2xBB : {pokerStats.evDoubleBigBlind} </div>
+            <br/>
+            <div>EV Half Pot : {pokerStats.evHalfPot} </div>
+            <br/>
+            <div>EV Three Quarter Pot : {pokerStats.evThreeQuarterPot} </div>
+            <br/>
+            <div>EV Pot : {pokerStats.evPot} </div>
+            <br/>
+            <div>EV All In : {pokerStats.evAllIn} </div>
             <br/>
         </div>
+
     }
     render() {
         var stats = this.createStats();
@@ -102,13 +135,32 @@ class PokerStatsForm extends React.Component {
                     <br/>
                     <br/>
                     <br/>
-
+                    <label>
+                        Villain Count:
+                        <input type="text" value={this.state.villainCount} onChange={this.handleVillainCountChange} />
+                    </label>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <label>
+                        Hand:
+                        <input type="text" value={this.state.hand} onChange={this.handleHandChange} />
+                    </label>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <label>
+                        Hero Stack:
+                        <input type="text" value={this.state.heroStack} onChange={this.handleHeroStackChange} />
+                    </label>
+                    <br/>
+                    <br/>
+                    <br/>
                     <label>
                         Pot:
                         <input type="text" value={this.state.pot} onChange={this.handlePotChange} />
                     </label>
                     <br/>
-
                     <br/>
                     <br/>
 

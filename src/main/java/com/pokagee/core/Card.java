@@ -21,6 +21,8 @@ package com.pokagee.core;
          byte cardRank;                -- contain 2, 3, ... 13, 14
    ----------------------------------------------------------- */
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class Card
@@ -36,6 +38,43 @@ public class Card
 
   private byte cardSuit;
   private byte cardRank;
+
+  private static Map<String,Byte> suitStrToNum = new HashMap<>();
+  private static Map<String,Byte> rankStrToNum = new HashMap<>();
+  static {
+    rankStrToNum.put("2", (byte)2);
+    rankStrToNum.put("3", (byte)3);
+    rankStrToNum.put("4", (byte)4);
+    rankStrToNum.put("5", (byte)5);
+    rankStrToNum.put("6", (byte)6);
+    rankStrToNum.put("7", (byte)7);
+    rankStrToNum.put("8", (byte)8);
+    rankStrToNum.put("9", (byte)9);
+    rankStrToNum.put("10", (byte)10);
+    rankStrToNum.put("j", (byte)11);
+    rankStrToNum.put("q", (byte)12);
+    rankStrToNum.put("k", (byte)13);
+    rankStrToNum.put("a", (byte)14);
+
+    suitStrToNum.put("d", (byte)1);
+    suitStrToNum.put("c", (byte)2);
+    suitStrToNum.put("h", (byte)3);
+    suitStrToNum.put("s", (byte)4);
+  }
+
+  public Card( String suit, String rank )
+  {
+    Byte nSuit = suitStrToNum.get(suit.toLowerCase());
+    Byte nRank = rankStrToNum.get(rank.toLowerCase());
+    if(nSuit==null) {
+      throw new RuntimeException("Invalid suit in card creation!");
+    }
+    if(nRank==null) {
+      throw new RuntimeException("Invalid rank in card creation!");
+    }
+    cardRank = nRank;
+    cardSuit = nSuit;
+  }
 
   public Card( int suit, int rank )
   {
