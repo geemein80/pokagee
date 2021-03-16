@@ -39,6 +39,8 @@ public class PokageeRestController {
   @PostMapping(path = "/stats", consumes = "application/json", produces = "application/json")
   public ResponseEntity turnStats(@RequestBody PokerStatsRequest pokerStatsRequest) {
     Long start = System.currentTimeMillis();
+    log.info("Calculating...");
+
     PokerStats pokerStats = PokerSimulator.calculatePokerStats(pokerStatsRequest);
     log.info("Duration Seconds : "+((System.currentTimeMillis()-start)/1000l));
     return new ResponseEntity(pokerStats, HttpStatus.OK);

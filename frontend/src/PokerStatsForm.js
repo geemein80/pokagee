@@ -2,7 +2,7 @@ import React, { Component } from "react";
 
 var xhr;
 var initialState = {
-    pot:'0',
+    pot:'',
     flop:'',
     turn:'',
     river:'',
@@ -25,6 +25,7 @@ class PokerStatsForm extends React.Component {
         this.handleHeroStackChange = this.handleHeroStackChange.bind(this);
         this.handleHandChange = this.handleHandChange.bind(this);
         this.handleVillainCountChange = this.handleVillainCountChange.bind(this);
+        this.handleNewGame = this.handleNewGame.bind(this);
 
         this.handleFlopChange = this.handleFlopChange.bind(this);
         this.handleTurnChange = this.handleTurnChange.bind(this);
@@ -40,6 +41,19 @@ class PokerStatsForm extends React.Component {
     handleVillainCountChange(event) {
         this.setState({villainCount: event.target.value});
     }
+    handleNewGame(event) {
+        this.setState({pot:''});
+        this.setState({flop:''});
+        this.setState({turn:''});
+        this.setState({hand:''});
+        this.setState({river:''});
+        this.setState({heroStack:''});
+        this.setState({pokerStats:{}});
+
+        event.preventDefault();
+
+    }
+
     handleHeroStackChange(event) {
         this.setState({heroStack: event.target.value});
     }
@@ -122,7 +136,6 @@ class PokerStatsForm extends React.Component {
     render() {
         var stats = this.createStats();
         return (<div>
-                <form onSubmit={this.handleSubmitBetStatsRequest}>
                     <label>
                         Small Blind:
                         <input type="text" value={this.state.smallBlind} onChange={this.handleSmallBlindChange} />
@@ -139,6 +152,13 @@ class PokerStatsForm extends React.Component {
                         Villain Count:
                         <input type="text" value={this.state.villainCount} onChange={this.handleVillainCountChange} />
                     </label>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <form onSubmit={this.handleNewGame}>
+
+                        <input type="submit" value="New Game" />
+                    </form>
                     <br/>
                     <br/>
                     <br/>
@@ -180,6 +200,8 @@ class PokerStatsForm extends React.Component {
                     </label>
                     <br/>
                     <br/>
+                <form onSubmit={this.handleSubmitBetStatsRequest}>
+
                     <input type="submit" value="Bet Stats" />
                 </form>
                 <br/>
